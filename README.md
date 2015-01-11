@@ -4,8 +4,8 @@
 * php5-curl
 * sqlite3
 * Apache 2.x
-** rewrite_module
-** php5_module
+* * rewrite_module
+* * php5_module
 
 ### Jenkins ###
 

@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+<style type="text/css">
+    .tg  {border-collapse:collapse;border-spacing:0;}
+    .tg td{font-family:Arial, sans-serif;font-size:14px;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+    .tg th{font-family:Arial, sans-serif;font-size:14px;font-weight:normal;padding:10px 5px;border-style:solid;border-width:1px;overflow:hidden;word-break:normal;}
+    .tg .row{text-align:center}
+    .tg .col{font-weight:bold;background-color:#9b9b9b;text-align:center}
+</style>
+<table class="tg"  style="width:100%">
+    <tr>
+        <th class="col">Name</th>
+        <th class="col">Email</th>
+    </tr>
+    <?php foreach ($list as $record): ?>
+        <tr>
+            <td class="row"><?php echo $record['name']?></td>
+            <td class="row"><?php echo $record['email']?></td>
+        </tr>
+    <?php endforeach; ?>
+</body>
+</html>

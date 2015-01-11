@@ -29,10 +29,15 @@ class Bootstrap
 
     private function runAction()
     {
-        $route = $_SERVER['REQUEST_URI'];
+        /**
+         * the route will not be used, anyway I used htmlspecialchars to prevent XSS attacks on URL
+         */
+        $route = htmlspecialchars($_SERVER['REQUEST_URI']);
         if (isset(static::$routeMap[$route])) {
             $controller = new IndexController();
             $controller->{'action'. static::$routeMap[$route]}();
+        }else {
+            header("HTTP/1.0 404 Not Found");
         }
     }
 

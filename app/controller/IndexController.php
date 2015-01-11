@@ -51,16 +51,21 @@ class IndexController extends AbstractController
             $name = trim($_POST['name']);
             $email = trim($_POST['email']);
 
-            // validate comment
-            if (empty($name) && empty($email)) {
-                exit("must provide a comment");
-            }
-
             // sanitize comment
             $name = strip_tags($name);
             $email = strip_tags($email);
 
-            $this->getDb()->prepare("INSERT INTO users(name, email) VALUES (:name, :email);")
+            // validate data
+            $regexString = array("options"=>array("regexp"=>"/^[A-Z][a-zA-Z -]+$/"));
+            if (!filter_var($name, FILTER_VALIDATE_REGEXP, $regexString)) {
+                exit("Full Name must contain letters, dashes and spaces only and must start with upper case letter.");
+            }
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                exit("The email is not valid");
+            }
+
+            $this->getDb()
+                ->prepare("INSERT INTO users(name, email) VALUES (:name, :email);")
                 ->execute(array(
                     ':name' => $name,
                     ':email' => $email));

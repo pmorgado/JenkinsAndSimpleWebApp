@@ -17,7 +17,7 @@ php jenkins/jenkins.php --url=http://domain_of_your_jenkins_server --port=8080 -
 
 ```
 
-### Apache conf example ###
+### APP ###
 
 When you are configuring the apache virtual hosts, you must:
 

@@ -5,7 +5,7 @@
 * sqlite3
 * Apache 2.x + rewrite_module + php5_module
 
-### Jenkins ###
+## Jenkins ##
 
 ```
 #!bash
@@ -15,9 +15,19 @@ php jenkins/jenkins.php --url=http://domain_of_your_jenkins_server --port=8080 -
 
 ```
 
-### APP ###
+## APP ##
 
-When you are configuring the apache virtual hosts, you must:
+## Init Database ##
 
-* DocumentRoot "/var/www/jenkinsandsimplewebapp/app/public"
+```
+#!bash
+
+sqlite3 app/database.db < app/scripts/users.sql
+
+```
+## Apache Configurations ##
+
+When you are configuring the apache virtual hosts, you must set:
+
+* DocumentRoot "{/var/www}/jenkinsandsimplewebapp/app/public"
 * DirectoryIndex index.php

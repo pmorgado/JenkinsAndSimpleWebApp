@@ -31,8 +31,7 @@ function insertUpdateIntoDB(array $jobs)
             }
         }
     } else {
-        echo "There are not jobs configured. No data inserted/updated.";
-        exit(0);
+        exit("There are not jobs configured. No data inserted/updated." . PHP_EOL);
     }
 }
 
@@ -42,29 +41,34 @@ function insertUpdateIntoDB(array $jobs)
  */
 function getAllJobsFromJenkins(array $params)
 {
+    $error = false;
     $result = parse_url($params['url']);
-    $url = $result['scheme'] . '://' . $params['username'] . ':' . $params['password'] . '@' . $result['host'];
-    $url .= isset($result['port']) ? ':' . $result['port'] : '';
+    $url = $result['scheme'] . '://' . $params['username'] . ':' . $params['token'] . '@' . $result['host'];
+    $url .= !empty($params['port']) ? ':' . $params['port'] : '';
     $url .= '/api/json';
 
-    /**
-     * This should authenticate via token generated on jenkins to avoid CSRF attacks on jenkins
-     * I didn't have time to explore it.
-     */
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
     curl_setopt($ch, CURLOPT_TIMEOUT, 30); //timeout after 30 seconds
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER,1);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $out = curl_exec($ch);
+
+    //save the error
+    if(curl_errno($ch)) {
+        $error = curl_error($ch);
+    } else if (strpos($out,'<html>') !== false) {
+        $error = $out;
+    }
     curl_close($ch);
 
-    if (!$out) {
-        echo "Invalid response from the jenkins server. Please, check if the server is well configured.";
-        exit(1);
+    if(!$error) {
+        $out = json_decode($out, true);
+        return $out['jobs'];
+    } else {
+        exit($error . PHP_EOL);
     }
-    $out = json_decode($out, true);
-    return $out['jobs'];
+
 }
 
 /**
@@ -73,23 +77,32 @@ function getAllJobsFromJenkins(array $params)
  */
 function getArgs(array $argv)
 {
-    $errorMessage = 'Usage:: php jenkins.php --url=http://localhost:8080 --username=user --password=123password123';
-    $params = array('url' => '', 'username' => '', 'password' => '');
+    unset($argv[0]);
+    $errorMessage = '::::Usage::::
+    php jenkins/jenkins.php
+    --url=http://domain_of_your_jenkins_server
+    --port=8080 (optional)
+    --username=user
+    --token=123usertoken123' . PHP_EOL;
 
-    if(count($argv) != 4) {
-        echo $errorMessage;
-        exit(1);
+    $params = array(
+        'url' => '',
+        'username' => '',
+        'token' => '',
+        'port' => ''
+    );
+
+    if(count($argv) != 3 && count($argv) != 4) {
+        exit($errorMessage);
     }
 
-    unset($argv[0]);
     foreach ($argv as $arg) {
         $res = explode('=',$arg);
         $param = substr($res[0], 2);
         if(isset($params[$param])) {
             $params[$param] = $res[1];
         } else {
-            echo $errorMessage;
-            exit(1);
+            exit($errorMessage);
         }
     }
     return $params;
@@ -101,16 +114,7 @@ function getArgs(array $argv)
 function getDbConn()
 {
     $path = dirname(__DIR__) . '/jenkins';
-    /**
-     * CREATE TABLE jobs (
-     * id integer primary key AUTOINCREMENT,
-     * name varchar(100),
-     * status varchar(40),
-     * updated_at datetime
-     * );
-     */
-    //TODO: check the exception
-    $dir = 'sqlite:'. $path .'/database1.db';
+    $dir = 'sqlite:'. $path .'/database.db';
 
     try {
         $conn = new PDO($dir);
@@ -118,7 +122,6 @@ function getDbConn()
         $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $conn;
     } catch(PDOException $e) {
-        echo "Connection failed: " . $e->getMessage();
-        exit(1);
+        exit("Connection failed: " . $e->getMessage() . PHP_EOL);
     }
 }

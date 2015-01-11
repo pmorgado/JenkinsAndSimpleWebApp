@@ -9,7 +9,7 @@
 ```
 #!bash
 
-sqlite3 database.db < table_jobs.sql
+sqlite3 jenkins/database.db < jenkins/table_jobs.sql
 php jenkins/jenkins.php --url=http://domain_of_your_jenkins_server --port=8080 --username=user --token=123usertoken123
 
 ```
